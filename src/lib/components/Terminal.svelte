@@ -9,29 +9,28 @@
 
 	type State = 'idle' | 'hiding' | 'questioning' | 'processing' | 'revealing';
 
-	let state: State = $state('idle');
-	let isShiftPressed: boolean = $state(false);
-	let hiddenAnswer: string = $state('');
-	let visibleQuestion: string = $state('');
-	let displayText: string = $state('');
-	let typewriter: Typewriter | null = $state(null);
-	let currentLang = $state($language);
+	let state: State = 'idle';
+	let isShiftPressed: boolean = false;
+	let hiddenAnswer: string = '';
+	let visibleQuestion: string = '';
+	let displayText: string = '';
+	let typewriter: Typewriter | null = null;
+	let currentLang: 'en' | 'pt-BR' = 'en';
 	let terminalContent: HTMLElement;
 
 	// Subscribe to language changes
-	$effect(() => {
-		const unsubscribe = language.subscribe((lang) => {
-			currentLang = lang;
-			if (typewriter) {
-				typewriter = new Typewriter(fillerFragments[lang]);
-			}
-			// Reset intro text when language changes
-			if (state === 'idle' && !hiddenAnswer && !visibleQuestion) {
-				displayText = translations[lang].intro;
-			}
-		});
-		return unsubscribe;
+	language.subscribe((lang) => {
+		currentLang = lang;
+		if (typewriter) {
+			typewriter = new Typewriter(fillerFragments[lang]);
+		}
+		// Reset intro text when language changes
+		if (state === 'idle' && !hiddenAnswer && !visibleQuestion) {
+			displayText = translations[lang].intro;
+		}
 	});
+
+	$: t = translations[currentLang];
 
 	onMount(() => {
 		// Initialize audio context
@@ -114,7 +113,6 @@
 		state = 'processing';
 		beeper.startProcessing();
 
-		const t = translations[currentLang];
 		const processingMsg = t.processing[Math.floor(Math.random() * t.processing.length)];
 		displayText += `\n\n${processingMsg}\n`;
 
@@ -141,7 +139,6 @@
 	}
 
 	function generateResponse(): string {
-		const t = translations[currentLang];
 		const r = t.responses;
 
 		const prefix = r.prefix[Math.floor(Math.random() * r.prefix.length)];

@@ -2,13 +2,10 @@
 	import { language } from '$lib/i18n/store';
 	import { translations } from '$lib/i18n/translations';
 
-	let currentLang = $state($language);
-
-	$effect(() => {
-		const unsubscribe = language.subscribe((lang) => {
-			currentLang = lang;
-		});
-		return unsubscribe;
+	let currentLang: 'en' | 'pt-BR' = 'en';
+	
+	language.subscribe((lang) => {
+		currentLang = lang;
 	});
 
 	$: t = translations[currentLang];

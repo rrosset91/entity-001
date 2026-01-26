@@ -3,7 +3,7 @@
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { onMount } from 'svelte';
 
-	let isMobile = $state(false);
+	let isMobile = false;
 
 	onMount(() => {
 		// Detect mobile device

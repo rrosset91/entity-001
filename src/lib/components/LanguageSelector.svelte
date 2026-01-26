@@ -2,22 +2,19 @@
 	import { language } from '$lib/i18n/store';
 	import type { Language } from '$lib/i18n/fillers';
 
-	let currentLang: Language = $state('en');
+	let currentLang: Language = 'en';
 	
-	$effect(() => {
-		const unsubscribe = language.subscribe((val) => {
-			currentLang = val;
-		});
-		return unsubscribe;
+	const unsubscribe = language.subscribe((val) => {
+		currentLang = val;
 	});
-
+	
 	function toggleLanguage() {
 		const newLang: Language = currentLang === 'en' ? 'pt-BR' : 'en';
 		language.setLanguage(newLang);
 	}
 </script>
 
-<button class="lang-selector" onclick={toggleLanguage} title="Change language">
+<button class="lang-selector" on:click={toggleLanguage} title="Change language">
 	{currentLang === 'en' ? 'EN' : 'PT'}
 </button>
 
