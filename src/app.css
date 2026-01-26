@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+:root {
+	/* Win95 Colors */
+	--win95-gray: #c0c0c0;
+	--win95-dark-gray: #808080;
+	--win95-white: #ffffff;
+	--win95-black: #000000;
+	--win95-blue: #000080;
+	--win95-teal: #008080;
+	
+	/* Borders */
+	--border-light: #dfdfdf;
+	--border-dark: #808080;
+	--border-darkest: #000000;
+	
+	/* Terminal */
+	--terminal-bg: #c0c0c0;
+	--terminal-text: #000000;
+	--cursor-color: #000000;
+	
+	/* CRT Effects */
+	--scanline-opacity: 0.1;
+	--glitch-intensity: 2px;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'VT323', 'Courier New', monospace;
+	font-size: 20px;
+	line-height: 1.4;
+	background: var(--win95-teal);
+	color: var(--terminal-text);
+	overflow: hidden;
+}
+
+/* Win95 3D Border Effect */
+.border-3d-raised {
+	border-top: 2px solid var(--border-light);
+	border-left: 2px solid var(--border-light);
+	border-right: 2px solid var(--border-darkest);
+	border-bottom: 2px solid var(--border-darkest);
+}
+
+.border-3d-inset {
+	border-top: 2px solid var(--border-darkest);
+	border-left: 2px solid var(--border-darkest);
+	border-right: 2px solid var(--border-light);
+	border-bottom: 2px solid var(--border-light);
+}
