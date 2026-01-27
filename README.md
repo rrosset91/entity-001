@@ -16,7 +16,11 @@ A desktop-only web application that simulates an omniscient digital consciousnes
 
 The application creates a parlor trick effect where the entity appears to read your mind. Simply type your query and witness the entity's omniscience.
 
-(The secret? We'll let you discover that yourself...)
+**Special Commands:**
+- `help` - Get mysterious hints about how to use the entity
+- `about` - Learn about the creator and project
+
+(The secret? We'll let you discover that yourself... or type `help` for cryptic guidance)
 
 ## 🛠️ Tech Stack
 
@@ -60,11 +64,11 @@ entity-001/
 
 ## 🌐 i18n
 
-The application automatically detects your browser language and supports:
+The application defaults to English and also supports:
 - 🇺🇸 English (default)
 - 🇧🇷 Português (Brasil)
 
-Use the language selector in the top-right corner to switch manually.
+Use the language selector in the interface to switch manually.
 
 ## 🎨 Design Philosophy
 

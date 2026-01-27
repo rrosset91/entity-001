@@ -2,16 +2,20 @@
 
 ## Overview
 
-ENTITY-001 is a desktop-only web application that simulates a mysterious, omniscient digital entity through a clever keyboard trick. When users hold SHIFT while typing, their hidden input (the "answer") is captured while displaying mystical filler text character-by-character, creating the illusion that they're addressing the entity. Upon releasing SHIFT and typing their actual question, the entity dramatically "reveals" the previously hidden answer, appearing to possess supernatural knowledge.
+ENTITY-001 is a desktop-only web application that simulates a mysterious, omniscient digital entity through a clever keyboard trick. When users hold TAB while typing, their hidden input (the "answer") is captured while displaying mystical filler text character-by-character, creating the illusion that they're addressing the entity. Upon releasing TAB and typing their actual question, the entity dramatically "reveals" the previously hidden answer, appearing to possess supernatural knowledge.
 
 ## Concept
 
 The application creates a parlor trick effect where:
-1. **User holds SHIFT** → Types answer (e.g., "Larissa") → System shows filler text sync'd 1:1 with keystrokes
-2. **User releases SHIFT** → Types question (e.g., "What's my wife's name?") → Displayed normally  
+1. **User holds TAB** → Types answer (e.g., "Larissa") → System shows filler text sync'd 1:1 with keystrokes
+2. **User releases TAB** → Types question (e.g., "What's my wife's name?") → Displayed normally  
 3. **User presses ENTER** → System "processes" → Reveals the hidden answer with mystical commentary
 
 To observers, it appears the entity knew the answer all along.
+
+**Special Commands:**
+- `help` - Provides enigmatic hints about using the entity
+- `about` - Displays creator information and project details
 
 ## Tech Stack
 
@@ -41,15 +45,19 @@ User Keyboard Input
      revealing)                │
         ↓                      │
 ┌───────┴──────────┐           │
-│ SHIFT pressed?   │           │
+│ TAB pressed?     │           │
 ├──────────────────┤           │
 │ YES: Typewriter  │           │
 │  → Get filler    │←──────────┘
+│     char         │
+│  → Type char-by- │
 │     char         │
 │  → Save to       │
 │     hiddenBuffer │
 │                  │
 │ NO: Direct       │
+│  → Type char-by- │
+│     char         │
 │  → Append to     │
 │     visibleQ     │
 └──────────────────┘
@@ -57,10 +65,16 @@ User Keyboard Input
   Display Update
         ↓
    ENTER pressed?
+   ┌─────┴─────┐
+   │ Command?  │
+   │ (help/    │
+   │  about)   │
+   └─────┬─────┘
         ↓
     Processing
    (2s delay +
-    beep sounds)
+    beep sounds +
+    typing anim)
         ↓
    Reveal Answer
   (hiddenBuffer)
@@ -78,10 +92,11 @@ User Keyboard Input
 - `revealing`: Displaying answer + entity commentary
 
 **Transitions:**
-- `idle` → `hiding`: SHIFT keydown detected
-- `hiding` → `questioning`: SHIFT keyup detected
+- `idle` → `hiding`: TAB keydown detected
+- `hiding` → `questioning`: TAB keyup detected (auto-completes current filler fragment)
 - `questioning` → `processing`: ENTER keypress (if question not empty)
-- `processing` → `revealing`: After delay + beep sequence
+- `idle` → `processing`: ENTER with special command (help/about)
+- `processing` → `revealing`: After delay + beep sequence + typing animation
 - `revealing` → `idle`: After reveal complete
 
 ### 2. Typewriter System (lib/utils/typewriter.ts)
@@ -105,7 +120,10 @@ class Typewriter {
 }
 ```
 
-**Key Feature:** If user types more characters than current filler length, automatically concatenates more fragments on-the-fly.
+**Key Features:** 
+- If user types more characters than current filler length, automatically concatenates more fragments on-the-fly
+- Tracks current fragment position to allow auto-completion when TAB is released early
+- Character-by-character typing animation (30ms per character) for immersive effect
 
 ### 3. Filler Fragments (lib/i18n/fillers.ts)
 
@@ -127,9 +145,13 @@ class Typewriter {
 **Sounds:**
 | Trigger | Pattern | Frequency | Duration |
 |---------|---------|-----------|----------|
-| Start processing | Single beep | 1000Hz | 100ms |
-| Reveal answer | Double beep | 1200Hz | 100ms x2 |
-| Finish | Single beep | 800Hz | 150ms |
+| Key press | Subtle beep | 800-1000Hz (random) | 30ms |
+| TAB start | Single beep | 1400Hz | 80ms |
+| TAB stop | Descending | 1200→1000Hz | 80ms x2 |
+| Start processing | Triple beep | 1000→1100→1200Hz | 100ms x3 |
+| Reveal answer | Double beep | 1400Hz | 120ms x2 |
+| Success | Ascending | 800→1000→1200Hz | 80ms x3 |
+| Error | Harsh descending | 400→350Hz | 150→200ms |
 
 **Implementation:**
 ```typescript
@@ -155,11 +177,7 @@ class Beeper {
 
 ### 6. i18n System
 
-**Detection:** 
-```typescript
-const detectLanguage = (): 'en' | 'pt-BR' => 
-  navigator.language.startsWith('pt') ? 'pt-BR' : 'en';
-```
+**Default:** English (`'en'`)
 
 **Storage:** `localStorage.setItem('entity-001-lang', selectedLang)`
 
