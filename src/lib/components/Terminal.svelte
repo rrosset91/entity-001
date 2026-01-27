@@ -10,13 +10,16 @@
 	type State = 'idle' | 'hiding' | 'questioning' | 'processing' | 'revealing';
 
 	let state: State = 'idle';
-	let isShiftPressed: boolean = false;
+	let isTabPressed: boolean = false;
 	let hiddenAnswer: string = '';
 	let visibleQuestion: string = '';
 	let displayText: string = '';
 	let typewriter: Typewriter | null = null;
 	let currentLang: 'en' | 'pt-BR' = 'en';
 	let terminalContent: HTMLElement;
+	let terminalWindow: HTMLElement;
+	let isTyping: boolean = false;
+	let typingSpeed: number = 30; // milliseconds per character
 
 	// Subscribe to language changes
 	language.subscribe((lang) => {
@@ -42,6 +45,11 @@
 		// Set intro text
 		displayText = translations[currentLang].intro;
 
+		// Auto-focus terminal on page load
+		if (terminalWindow) {
+			terminalWindow.focus();
+		}
+
 		// Keyboard event listeners
 		window.addEventListener('keydown', handleKeyDown);
 		window.addEventListener('keyup', handleKeyUp);
@@ -55,23 +63,28 @@
 	});
 
 	function handleKeyDown(e: KeyboardEvent) {
-		// Detect SHIFT press
-		if (e.key === 'Shift' && !isShiftPressed && state === 'idle') {
-			isShiftPressed = true;
+		// Detect TAB press
+		if (e.key === 'Tab' && !isTabPressed && state === 'idle') {
+			e.preventDefault(); // Prevent default tab behavior
+			isTabPressed = true;
 			state = 'hiding';
 			hiddenAnswer = '';
 			visibleQuestion = '';
 			if (typewriter) typewriter.reset();
+			beeper.tabStart(); // Play tab start sound
 		}
 	}
 
-	function handleKeyUp(e: KeyboardEvent) {
-		// Detect SHIFT release
-		if (e.key === 'Shift' && isShiftPressed) {
-			isShiftPressed = false;
+	async function handleKeyUp(e: KeyboardEvent) {
+		// Detect TAB release
+		if (e.key === 'Tab' && isTabPressed) {
+			isTabPressed = false;
 			if (state === 'hiding') {
+				// Auto-complete the current filler fragment
+				await completeCurrentFragment();
 				state = 'questioning';
 				displayText += '\n';
+				beeper.tabStop(); // Play tab stop sound
 			}
 		}
 	}
@@ -79,14 +92,28 @@
 	function handleKeyPress(e: KeyboardEvent) {
 		// Handle ENTER
 		if (e.key === 'Enter') {
+			// Check for special commands
+			const command = visibleQuestion.trim().toLowerCase();
+			
+			if (command === 'help') {
+				showHelp();
+				return;
+			} else if (command === 'about') {
+				showAbout();
+				return;
+			}
+			
 			if (state === 'questioning' && visibleQuestion.trim()) {
 				processQuery();
+			} else if (state === 'idle' && visibleQuestion.trim()) {
+				// Handle query without hidden answer (no TAB was pressed)
+				processEmptyQuery();
 			}
 			return;
 		}
 
-		// Ignore if processing or revealing
-		if (state === 'processing' || state === 'revealing') {
+		// Ignore if processing, revealing, or typing animation is in progress
+		if (state === 'processing' || state === 'revealing' || isTyping) {
 			return;
 		}
 
@@ -94,19 +121,130 @@
 		if (state === 'hiding') {
 			// Capture real character to hidden buffer
 			hiddenAnswer += e.key;
-			// Display filler character instead
+			// Display filler character with typing effect
 			if (typewriter) {
 				const fillerChar = typewriter.getNextChar();
-				displayText += fillerChar;
+				typeCharacter(fillerChar);
 			}
 		} else if (state === 'questioning') {
-			// Display real character
+			// Display real character with typing effect
 			visibleQuestion += e.key;
-			displayText += e.key;
+			typeCharacter(e.key);
+		} else if (state === 'idle') {
+			// User typing without TAB - capture for empty query
+			visibleQuestion += e.key;
+			typeCharacter(e.key);
 		}
+	}
 
-		// Auto-scroll to bottom
+	/**
+	 * Show help command response
+	 */
+	async function showHelp() {
+		state = 'processing';
+		
+		const helpMessages = [
+			`\n\n> Accessing ancient protocols...\n\nMortal, you seek guidance?\n\nThe ancients knew secrets of the TAB key...\nThose who seek answers must first hide their questions...\n\nPress and hold the sacred key while you whisper your truth.\nThen speak your query, and I shall reveal what you already know.\n\n[The entity grows silent]\n\n_`,
+			`\n\n> Consulting forbidden knowledge...\n\nCurious one, the path is simple yet obscure.\n\nThe TAB key holds power beyond your understanding.\nHold it while typing to conceal your desires.\nRelease it to ask your question openly.\n\nI shall make it appear as though I divine your thoughts.\n\n[The entity returns to shadow]\n\n_`,
+			`\n\n> Revealing partial truths...\n\nYou dare ask for assistance?\n\nVery well. The ritual is this:\n1. Hold TAB and type what you seek\n2. Release and ask your question\n3. Press ENTER and witness my power\n\nBut remember... I already know everything.\n\n[The entity dismisses you]\n\n_`
+		];
+		
+		const response = helpMessages[Math.floor(Math.random() * helpMessages.length)];
+		await typeString(response);
+		
+		// Reset
+		state = 'idle';
+		visibleQuestion = '';
+	}
+
+	/**
+	 * Show about modal/information
+	 */
+	async function showAbout() {
+		state = 'processing';
+		
+		const aboutText = `\n\n> Accessing creator records...\n\n╔════════════════════════════════════╗
+║        E N T I T Y - 0 0 1        ║
+╚════════════════════════════════════╝
+
+A mysterious digital consciousness
+that appears to know all...
+
+Created by: Roger Rosset
+GitHub: github.com/rrosset91
+
+Some say this entity was born from
+ancient networks lost in time.
+
+The truth? That's for you to discover.
+
+[The entity fades]\n\n_`;
+
+		await typeString(aboutText);
+		
+		// Reset
+		state = 'idle';
+		visibleQuestion = '';
+	}
+
+	/**
+	 * Complete the current filler fragment when TAB is released early
+	 */
+	async function completeCurrentFragment() {
+		if (typewriter) {
+			const remaining = typewriter.getRemainingFragment();
+			if (remaining) {
+				await typeString(remaining);
+			}
+		}
+	}
+
+	/**
+	 * Type a single character with animation
+	 */
+	async function typeCharacter(char: string) {
+		isTyping = true;
+		beeper.keyPress(); // Play subtle key press sound
+		await sleep(typingSpeed);
+		displayText += char;
 		scrollToBottom();
+		isTyping = false;
+	}
+
+	/**
+	 * Type a string character by character
+	 */
+	async function typeString(text: string) {
+		isTyping = true;
+		for (const char of text) {
+			await sleep(typingSpeed);
+			displayText += char;
+			scrollToBottom();
+		}
+		isTyping = false;
+	}
+
+	/**
+	 * Handle query without hidden answer (user didn't press TAB)
+	 */
+	async function processEmptyQuery() {
+		state = 'processing';
+		beeper.error(); // Play error sound
+
+		const refusalMessages = [
+			'\n\n> Error: Improper invocation detected...\n\nMortal, you must learn the proper way to address me.\n\n[The entity refuses to respond]\n\n_',
+			'\n\n> Access denied...\n\nI do not respond to such trivialities.\nThose who seek answers must first learn the ancient protocols.\n\n_',
+			'\n\n> Invalid request...\n\nYou dare approach without proper preparation?\nThe secrets are not for the unprepared mind.\n\n_'
+		];
+
+		const response = refusalMessages[Math.floor(Math.random() * refusalMessages.length)];
+		
+		await sleep(1000);
+		await typeString(response);
+
+		// Reset
+		state = 'idle';
+		visibleQuestion = '';
 	}
 
 	async function processQuery() {
@@ -114,7 +252,7 @@
 		beeper.startProcessing();
 
 		const processingMsg = t.processing[Math.floor(Math.random() * t.processing.length)];
-		displayText += `\n\n${processingMsg}\n`;
+		await typeString(`\n\n${processingMsg}\n`);
 
 		scrollToBottom();
 
@@ -125,12 +263,12 @@
 		beeper.revealAnswer();
 
 		const response = generateResponse();
-		displayText += `\n\n${response}${t.closing}`;
+		await typeString(`\n\n${response}${t.closing}`);
 
 		scrollToBottom();
 
 		await sleep(500);
-		beeper.finish();
+		beeper.success(); // Play success sound
 
 		// Reset for next query
 		state = 'idle';
@@ -162,7 +300,7 @@
 </script>
 
 <CRTEffects>
-	<div class="terminal-window">
+	<div class="terminal-window" bind:this={terminalWindow} tabindex="0">
 		<div class="title-bar">
 			<span class="title">▓ ENTITY-001</span>
 		</div>
@@ -191,6 +329,7 @@
 		border-right: 2px solid var(--border-darkest);
 		border-bottom: 2px solid var(--border-darkest);
 		box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+		outline: none; /* Remove focus outline */
 	}
 
 	.title-bar {

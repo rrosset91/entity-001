@@ -9,12 +9,11 @@ import type { Language } from './fillers';
 const STORAGE_KEY = 'entity-001-lang';
 
 /**
- * Detect browser language
+ * Detect browser language - defaults to English
  */
 function detectLanguage(): Language {
-	if (typeof navigator === 'undefined') return 'en';
-	const browserLang = navigator.language;
-	return browserLang.startsWith('pt') ? 'pt-BR' : 'en';
+	// Always default to English
+	return 'en';
 }
 
 /**
