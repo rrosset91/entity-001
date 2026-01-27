@@ -19,8 +19,13 @@
 	--terminal-text: #000000;
 	--cursor-color: #000000;
 	
-	/* CRT Effects */
-	--scanline-opacity: 0.1;
+	/* CRT Effects - Easily adjustable */
+	--scanline-opacity: 0.15;
+	--scanline-spacing: 3px;
+	--screen-curvature: 12px;
+	--vignette-strength: 0.5;
+	--phosphor-glow: 2px;
+	--screen-flicker-speed: 0.15s;
 	--glitch-intensity: 2px;
 }
 

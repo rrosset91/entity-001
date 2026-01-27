@@ -330,6 +330,10 @@ The truth? That's for you to discover.
 		border-bottom: 2px solid var(--border-darkest);
 		box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 		outline: none; /* Remove focus outline */
+		
+		/* CRT screen curvature (matches wrapper) */
+		border-radius: 10px;
+		overflow: hidden;
 	}
 
 	.title-bar {
@@ -338,6 +342,11 @@ The truth? That's for you to discover.
 		padding: 0.25rem 0.5rem;
 		font-weight: bold;
 		border-bottom: 2px solid var(--border-darkest);
+		
+		/* Subtle text glow on title */
+		text-shadow: 
+			0 0 2px rgba(255, 255, 255, 0.3),
+			0 0 4px rgba(255, 255, 255, 0.15);
 	}
 
 	.terminal-content {
@@ -352,6 +361,11 @@ The truth? That's for you to discover.
 		border-left: 2px solid var(--border-darkest);
 		border-right: 2px solid var(--border-light);
 		border-bottom: 2px solid var(--border-light);
+		
+		/* CRT phosphor glow effect on text */
+		text-shadow: 
+			0 0 1px rgba(0, 0, 0, 0.5),
+			0 0 2px rgba(0, 0, 0, 0.3);
 	}
 
 	pre {
@@ -367,6 +381,11 @@ The truth? That's for you to discover.
 		height: 20px;
 		background: var(--cursor-color);
 		animation: blink 1s step-end infinite;
+		
+		/* Cursor glow effect */
+		box-shadow: 
+			0 0 2px rgba(0, 0, 0, 0.8),
+			0 0 4px rgba(0, 0, 0, 0.4);
 	}
 
 	@keyframes blink {
