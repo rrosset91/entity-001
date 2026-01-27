@@ -4,6 +4,10 @@
 
 A desktop-only web application that simulates an omniscient digital consciousness through a clever keyboard trick. Experience the mystique of an ancient entity from the old web.
 
+## 🚀 Live Demo
+
+**Production:** https://entity-001.pages.dev
+
 ## ✨ Features
 
 - **Mysterious Entity**: Interact with ENTITY-001, a consciousness that appears to know everything
