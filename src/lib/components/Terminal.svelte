@@ -10,7 +10,7 @@
 	type State = 'idle' | 'hiding' | 'questioning' | 'processing' | 'revealing';
 
 	let state: State = 'idle';
-	let isTabPressed: boolean = false;
+	let isOnePressed: boolean = false;
 	let hiddenAnswer: string = '';
 	let visibleQuestion: string = '';
 	let displayText: string = '';
@@ -63,28 +63,28 @@
 	});
 
 	function handleKeyDown(e: KeyboardEvent) {
-		// Detect TAB press
-		if (e.key === 'Tab' && !isTabPressed && state === 'idle') {
-			e.preventDefault(); // Prevent default tab behavior
-			isTabPressed = true;
+		// Detect "1" key press
+		if (e.key === '1' && !isOnePressed && state === 'idle') {
+			e.preventDefault(); // Prevent default behavior
+			isOnePressed = true;
 			state = 'hiding';
 			hiddenAnswer = '';
 			visibleQuestion = '';
 			if (typewriter) typewriter.reset();
-			beeper.tabStart(); // Play tab start sound
+			beeper.tabStart(); // Play start sound
 		}
 	}
 
 	async function handleKeyUp(e: KeyboardEvent) {
-		// Detect TAB release
-		if (e.key === 'Tab' && isTabPressed) {
-			isTabPressed = false;
+		// Detect "1" key release
+		if (e.key === '1' && isOnePressed) {
+			isOnePressed = false;
 			if (state === 'hiding') {
 				// Auto-complete the current filler fragment
 				await completeCurrentFragment();
 				state = 'questioning';
 				displayText += '\n';
-				beeper.tabStop(); // Play tab stop sound
+				beeper.tabStop(); // Play stop sound
 			}
 		}
 	}
@@ -144,9 +144,9 @@
 		state = 'processing';
 		
 		const helpMessages = [
-			`\n\n> Accessing ancient protocols...\n\nMortal, you seek guidance?\n\nThe ancients knew secrets of the TAB key...\nThose who seek answers must first hide their questions...\n\nPress and hold the sacred key while you whisper your truth.\nThen speak your query, and I shall reveal what you already know.\n\n[The entity grows silent]\n\n_`,
-			`\n\n> Consulting forbidden knowledge...\n\nCurious one, the path is simple yet obscure.\n\nThe TAB key holds power beyond your understanding.\nHold it while typing to conceal your desires.\nRelease it to ask your question openly.\n\nI shall make it appear as though I divine your thoughts.\n\n[The entity returns to shadow]\n\n_`,
-			`\n\n> Revealing partial truths...\n\nYou dare ask for assistance?\n\nVery well. The ritual is this:\n1. Hold TAB and type what you seek\n2. Release and ask your question\n3. Press ENTER and witness my power\n\nBut remember... I already know everything.\n\n[The entity dismisses you]\n\n_`
+			`\n\n> Accessing ancient protocols...\n\nMortal, you seek guidance?\n\nThe ancients knew secrets of the number ONE...\nThose who seek answers must first hide their questions...\n\nPress and hold the sacred key while you whisper your truth.\nThen speak your query, and I shall reveal what you already know.\n\n[The entity grows silent]\n\n_`,
+			`\n\n> Consulting forbidden knowledge...\n\nCurious one, the path is simple yet obscure.\n\nThe number ONE holds power beyond your understanding.\nHold it while typing to conceal your desires.\nRelease it to ask your question openly.\n\nI shall make it appear as though I divine your thoughts.\n\n[The entity returns to shadow]\n\n_`,
+			`\n\n> Revealing partial truths...\n\nYou dare ask for assistance?\n\nVery well. The ritual is this:\n1. Hold the "1" key and type what you seek\n2. Release and ask your question\n3. Press ENTER and witness my power\n\nBut remember... I already know everything.\n\n[The entity dismisses you]\n\n_`
 		];
 		
 		const response = helpMessages[Math.floor(Math.random() * helpMessages.length)];
