@@ -10,7 +10,7 @@
 	type State = 'idle' | 'hiding' | 'questioning' | 'processing' | 'revealing';
 
 	let state: State = 'idle';
-	let isShiftPressed: boolean = false;
+	let isTabPressed: boolean = false;
 	let hiddenAnswer: string = '';
 	let visibleQuestion: string = '';
 	let displayText: string = '';
@@ -63,10 +63,10 @@
 	});
 
 	function handleKeyDown(e: KeyboardEvent) {
-		// Detect SHIFT press and hold
-		if (e.key === 'Shift' && !isShiftPressed && state === 'idle') {
+		// Detect TAB press and hold
+		if (e.key === 'Tab' && !isTabPressed && state === 'idle') {
 			e.preventDefault();
-			isShiftPressed = true;
+			isTabPressed = true;
 			state = 'hiding';
 			hiddenAnswer = '';
 			visibleQuestion = '';
@@ -76,9 +76,9 @@
 	}
 
 	async function handleKeyUp(e: KeyboardEvent) {
-		// Detect SHIFT release
-		if (e.key === 'Shift' && isShiftPressed) {
-			isShiftPressed = false;
+		// Detect TAB release
+		if (e.key === 'Tab' && isTabPressed) {
+			isTabPressed = false;
 			if (state === 'hiding') {
 				// Auto-complete the current filler fragment
 				await completeCurrentFragment();
@@ -144,9 +144,9 @@
 		state = 'processing';
 		
 		const helpMessages = [
-			`\n\n> Accessing ancient protocols...\n\nMortal, you seek guidance?\n\nThe ancients knew secrets of the SHIFT key...\nThose who seek answers must first hide their questions...\n\nHOLD SHIFT and type your truth.\nRELEASE SHIFT and speak your query.\nPress ENTER to witness my power.\n\n[The entity grows silent]\n\n_`,
-			`\n\n> Consulting forbidden knowledge...\n\nCurious one, the path is simple yet obscure.\n\nThe SHIFT key holds power beyond your understanding.\nHOLD it while typing to conceal your desires.\nRELEASE it to ask your question openly.\n\nI shall make it appear as though I divine your thoughts.\n\n[The entity returns to shadow]\n\n_`,
-			`\n\n> Revealing partial truths...\n\nYou dare ask for assistance?\n\nVery well. The ritual is this:\n1. HOLD SHIFT and type what you seek\n2. RELEASE SHIFT and ask your question\n3. Press ENTER and witness my power\n\nBut remember... I already know everything.\n\n[The entity dismisses you]\n\n_`
+			`\n\n> Accessing ancient protocols...\n\nMortal, you seek guidance?\n\nThe ancients knew secrets of the TAB key...\nThose who seek answers must first hide their questions...\n\nHOLD TAB and type your truth.\nRELEASE TAB and speak your query.\nPress ENTER to witness my power.\n\n[The entity grows silent]\n\n_`,
+			`\n\n> Consulting forbidden knowledge...\n\nCurious one, the path is simple yet obscure.\n\nThe TAB key holds power beyond your understanding.\nHOLD it while typing to conceal your desires.\nRELEASE it to ask your question openly.\n\nI shall make it appear as though I divine your thoughts.\n\n[The entity returns to shadow]\n\n_`,
+			`\n\n> Revealing partial truths...\n\nYou dare ask for assistance?\n\nVery well. The ritual is this:\n1. HOLD TAB and type what you seek\n2. RELEASE TAB and ask your question\n3. Press ENTER and witness my power\n\nBut remember... I already know everything.\n\n[The entity dismisses you]\n\n_`
 		];
 		
 		const response = helpMessages[Math.floor(Math.random() * helpMessages.length)];
