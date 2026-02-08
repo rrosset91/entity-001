@@ -10,7 +10,7 @@
 	type State = 'idle' | 'hiding' | 'questioning' | 'processing' | 'revealing';
 
 	let state: State = 'idle';
-	let isOnePressed: boolean = false;
+	let isHidingMode: boolean = false; // Toggle mode for hiding answer
 	let hiddenAnswer: string = '';
 	let visibleQuestion: string = '';
 	let displayText: string = '';
@@ -62,31 +62,37 @@
 		};
 	});
 
-	function handleKeyDown(e: KeyboardEvent) {
-		// Detect "1" key press
-		if (e.key === '1' && !isOnePressed && state === 'idle') {
-			e.preventDefault(); // Prevent default behavior
-			isOnePressed = true;
-			state = 'hiding';
-			hiddenAnswer = '';
-			visibleQuestion = '';
-			if (typewriter) typewriter.reset();
-			beeper.tabStart(); // Play start sound
+	async function handleKeyDown(e: KeyboardEvent) {
+		// Toggle hiding mode with ALT key
+		if (e.key === 'Alt') {
+			e.preventDefault(); // Prevent default ALT behavior
+			
+			if (!isHidingMode) {
+				// Entering hiding mode
+				if (state === 'idle') {
+					isHidingMode = true;
+					state = 'hiding';
+					hiddenAnswer = '';
+					visibleQuestion = '';
+					if (typewriter) typewriter.reset();
+					beeper.tabStart(); // Play start sound
+				}
+			} else {
+				// Exiting hiding mode
+				if (state === 'hiding') {
+					isHidingMode = false;
+					// Auto-complete the current filler fragment
+					await completeCurrentFragment();
+					state = 'questioning';
+					displayText += '\n';
+					beeper.tabStop(); // Play stop sound
+				}
+			}
 		}
 	}
 
 	async function handleKeyUp(e: KeyboardEvent) {
-		// Detect "1" key release
-		if (e.key === '1' && isOnePressed) {
-			isOnePressed = false;
-			if (state === 'hiding') {
-				// Auto-complete the current filler fragment
-				await completeCurrentFragment();
-				state = 'questioning';
-				displayText += '\n';
-				beeper.tabStop(); // Play stop sound
-			}
-		}
+		// Not used anymore, but keeping for potential future use
 	}
 
 	function handleKeyPress(e: KeyboardEvent) {
@@ -144,9 +150,9 @@
 		state = 'processing';
 		
 		const helpMessages = [
-			`\n\n> Accessing ancient protocols...\n\nMortal, you seek guidance?\n\nThe ancients knew secrets of the number ONE...\nThose who seek answers must first hide their questions...\n\nPress and hold the sacred key while you whisper your truth.\nThen speak your query, and I shall reveal what you already know.\n\n[The entity grows silent]\n\n_`,
-			`\n\n> Consulting forbidden knowledge...\n\nCurious one, the path is simple yet obscure.\n\nThe number ONE holds power beyond your understanding.\nHold it while typing to conceal your desires.\nRelease it to ask your question openly.\n\nI shall make it appear as though I divine your thoughts.\n\n[The entity returns to shadow]\n\n_`,
-			`\n\n> Revealing partial truths...\n\nYou dare ask for assistance?\n\nVery well. The ritual is this:\n1. Hold the "1" key and type what you seek\n2. Release and ask your question\n3. Press ENTER and witness my power\n\nBut remember... I already know everything.\n\n[The entity dismisses you]\n\n_`
+			`\n\n> Accessing ancient protocols...\n\nMortal, you seek guidance?\n\nThe ancients knew secrets of the ALT key...\nThose who seek answers must first hide their questions...\n\nPress ALT to enter the shadow realm.\nType your truth while concealed.\nPress ALT again to emerge and speak your query.\n\n[The entity grows silent]\n\n_`,
+			`\n\n> Consulting forbidden knowledge...\n\nCurious one, the path is simple yet obscure.\n\nThe ALT key holds power beyond your understanding.\nPress it once to hide your desires.\nType what you seek in secret.\nPress ALT again to ask your question openly.\n\nI shall make it appear as though I divine your thoughts.\n\n[The entity returns to shadow]\n\n_`,
+			`\n\n> Revealing partial truths...\n\nYou dare ask for assistance?\n\nVery well. The ritual is this:\n1. Press ALT to enter hiding mode\n2. Type what you seek in secret\n3. Press ALT again to exit and ask your question\n4. Press ENTER and witness my power\n\nBut remember... I already know everything.\n\n[The entity dismisses you]\n\n_`
 		];
 		
 		const response = helpMessages[Math.floor(Math.random() * helpMessages.length)];
