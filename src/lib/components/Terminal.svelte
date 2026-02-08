@@ -63,9 +63,9 @@
 	});
 
 	async function handleKeyDown(e: KeyboardEvent) {
-		// Toggle hiding mode with ALT key
-		if (e.key === 'Alt') {
-			e.preventDefault(); // Prevent default ALT behavior
+		// Toggle hiding mode with SHIFT key
+		if (e.key === 'Shift') {
+			e.preventDefault(); // Prevent default SHIFT behavior
 			
 			if (!isHidingMode) {
 				// Entering hiding mode
@@ -150,9 +150,9 @@
 		state = 'processing';
 		
 		const helpMessages = [
-			`\n\n> Accessing ancient protocols...\n\nMortal, you seek guidance?\n\nThe ancients knew secrets of the ALT key...\nThose who seek answers must first hide their questions...\n\nPress ALT to enter the shadow realm.\nType your truth while concealed.\nPress ALT again to emerge and speak your query.\n\n[The entity grows silent]\n\n_`,
-			`\n\n> Consulting forbidden knowledge...\n\nCurious one, the path is simple yet obscure.\n\nThe ALT key holds power beyond your understanding.\nPress it once to hide your desires.\nType what you seek in secret.\nPress ALT again to ask your question openly.\n\nI shall make it appear as though I divine your thoughts.\n\n[The entity returns to shadow]\n\n_`,
-			`\n\n> Revealing partial truths...\n\nYou dare ask for assistance?\n\nVery well. The ritual is this:\n1. Press ALT to enter hiding mode\n2. Type what you seek in secret\n3. Press ALT again to exit and ask your question\n4. Press ENTER and witness my power\n\nBut remember... I already know everything.\n\n[The entity dismisses you]\n\n_`
+			`\n\n> Accessing ancient protocols...\n\nMortal, you seek guidance?\n\nThe ancients knew secrets of the SHIFT key...\nThose who seek answers must first hide their questions...\n\nPress SHIFT to enter the shadow realm.\nType your truth while concealed.\nPress SHIFT again to emerge and speak your query.\n\n[The entity grows silent]\n\n_`,
+			`\n\n> Consulting forbidden knowledge...\n\nCurious one, the path is simple yet obscure.\n\nThe SHIFT key holds power beyond your understanding.\nPress it once to hide your desires.\nType what you seek in secret.\nPress SHIFT again to ask your question openly.\n\nI shall make it appear as though I divine your thoughts.\n\n[The entity returns to shadow]\n\n_`,
+			`\n\n> Revealing partial truths...\n\nYou dare ask for assistance?\n\nVery well. The ritual is this:\n1. Press SHIFT to enter hiding mode\n2. Type what you seek in secret\n3. Press SHIFT again to exit and ask your question\n4. Press ENTER and witness my power\n\nBut remember... I already know everything.\n\n[The entity dismisses you]\n\n_`
 		];
 		
 		const response = helpMessages[Math.floor(Math.random() * helpMessages.length)];
