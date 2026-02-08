@@ -10,7 +10,8 @@
 	type State = 'idle' | 'hiding' | 'questioning' | 'processing' | 'revealing';
 
 	let state: State = 'idle';
-	let isTabPressed: boolean = false;
+	let isHidingMode: boolean = false; // Toggle mode
+	let tabKeyHandled: boolean = false; // Prevent repeated keydown
 	let hiddenAnswer: string = '';
 	let visibleQuestion: string = '';
 	let displayText: string = '';
@@ -62,30 +63,41 @@
 		};
 	});
 
-	function handleKeyDown(e: KeyboardEvent) {
-		// Detect TAB press and hold
-		if (e.key === 'Tab' && !isTabPressed && state === 'idle') {
+	async function handleKeyDown(e: KeyboardEvent) {
+		// Toggle hiding mode with TAB key
+		// Prevent repeated keydown events when key is held
+		if (e.key === 'Tab' && !tabKeyHandled) {
 			e.preventDefault();
-			isTabPressed = true;
-			state = 'hiding';
-			hiddenAnswer = '';
-			visibleQuestion = '';
-			if (typewriter) typewriter.reset();
-			beeper.tabStart();
+			tabKeyHandled = true;
+			
+			if (!isHidingMode) {
+				// Entering hiding mode
+				if (state === 'idle') {
+					isHidingMode = true;
+					state = 'hiding';
+					hiddenAnswer = '';
+					visibleQuestion = '';
+					if (typewriter) typewriter.reset();
+					beeper.tabStart();
+				}
+			} else {
+				// Exiting hiding mode
+				if (state === 'hiding') {
+					isHidingMode = false;
+					// Auto-complete the current filler fragment
+					await completeCurrentFragment();
+					state = 'questioning';
+					displayText += '\n';
+					beeper.tabStop();
+				}
+			}
 		}
 	}
 
 	async function handleKeyUp(e: KeyboardEvent) {
-		// Detect TAB release
-		if (e.key === 'Tab' && isTabPressed) {
-			isTabPressed = false;
-			if (state === 'hiding') {
-				// Auto-complete the current filler fragment
-				await completeCurrentFragment();
-				state = 'questioning';
-				displayText += '\n';
-				beeper.tabStop();
-			}
+		// Reset the tab key handler when released
+		if (e.key === 'Tab') {
+			tabKeyHandled = false;
 		}
 	}
 
@@ -144,9 +156,9 @@
 		state = 'processing';
 		
 		const helpMessages = [
-			`\n\n> Accessing ancient protocols...\n\nMortal, you seek guidance?\n\nThe ancients knew secrets of the TAB key...\nThose who seek answers must first hide their questions...\n\nHOLD TAB and type your truth.\nRELEASE TAB and speak your query.\nPress ENTER to witness my power.\n\n[The entity grows silent]\n\n_`,
-			`\n\n> Consulting forbidden knowledge...\n\nCurious one, the path is simple yet obscure.\n\nThe TAB key holds power beyond your understanding.\nHOLD it while typing to conceal your desires.\nRELEASE it to ask your question openly.\n\nI shall make it appear as though I divine your thoughts.\n\n[The entity returns to shadow]\n\n_`,
-			`\n\n> Revealing partial truths...\n\nYou dare ask for assistance?\n\nVery well. The ritual is this:\n1. HOLD TAB and type what you seek\n2. RELEASE TAB and ask your question\n3. Press ENTER and witness my power\n\nBut remember... I already know everything.\n\n[The entity dismisses you]\n\n_`
+			`\n\n> Accessing ancient protocols...\n\nMortal, you seek guidance?\n\nThe ancients knew secrets of the TAB key...\nThose who seek answers must first hide their questions...\n\nPress TAB once to enter the shadow realm.\nType your truth while concealed.\nPress TAB again to emerge and speak your query.\n\n[The entity grows silent]\n\n_`,
+			`\n\n> Consulting forbidden knowledge...\n\nCurious one, the path is simple yet obscure.\n\nThe TAB key holds power beyond your understanding.\nPress it once to hide your desires.\nType what you seek in secret.\nPress TAB again to ask your question openly.\n\nI shall make it appear as though I divine your thoughts.\n\n[The entity returns to shadow]\n\n_`,
+			`\n\n> Revealing partial truths...\n\nYou dare ask for assistance?\n\nVery well. The ritual is this:\n1. Press TAB to enter hiding mode\n2. Type what you seek in secret\n3. Press TAB again to exit and ask your question\n4. Press ENTER and witness my power\n\nBut remember... I already know everything.\n\n[The entity dismisses you]\n\n_`
 		];
 		
 		const response = helpMessages[Math.floor(Math.random() * helpMessages.length)];
